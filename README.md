@@ -112,8 +112,6 @@ Returns user profile information along with a random cat fact.
 ### Install Dependencies
 
 ```bash
-yarn install
-# or
 npm install
 ```
 
@@ -121,10 +119,10 @@ npm install
 
 ```bash
 # Production
-yarn start
+npm start
 
 # Development (with auto-reload)
-yarn dev
+npm run dev
 ```
 
 ### Test the Endpoint
