@@ -8,4 +8,6 @@ router.get("/", StringsController.getAllStrings);
 
 router.get("/:value", StringsController.getSpecificString);
 
+router.delete("/:value", StringsController.deleteSpecificString);
+
 module.exports = router;

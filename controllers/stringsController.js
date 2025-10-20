@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { isPalindrome, createSha256Hash } = require("../utils");
-const stringsDb = require("../db/strings");
+let stringsDb = require("../db/strings");
 
 class StringsController {
   static async analyzeString(req, res) {
@@ -264,6 +264,62 @@ class StringsController {
       };
 
       return res.status(200).json(response);
+    } catch (error) {
+      console.error("Error:", error?.message);
+
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+        error: error?.message,
+      });
+    }
+  }
+
+  static async deleteSpecificString(req, res) {
+    try {
+      let value = req.params?.value;
+
+      if (!value) {
+        return res.status(400).json({
+          status: "error",
+          message: "Value is required",
+        });
+      }
+
+      if (typeof value !== "string") {
+        return res.status(422).json({
+          status: "error",
+          message: "Value must be a string",
+        });
+      }
+
+      const sha256_hash = createSha256Hash(value);
+
+      const existingEntry = (stringsDb || []).find(
+        (entry) => entry.id === sha256_hash
+      );
+
+      if (!existingEntry) {
+        return res.status(404).json({
+          status: "error",
+          message: "String not found",
+        });
+      }
+
+      // Remove the entry from the database
+      stringsDb = stringsDb.filter((entry) => entry.id !== sha256_hash);
+
+      // Persist to file
+      const dbPath = path.join(__dirname, "..", "db", "strings.js");
+      const dbContent = `module.exports = ${JSON.stringify(
+        stringsDb,
+        null,
+        2
+      )};`;
+
+      fs.writeFileSync(dbPath, dbContent, "utf8");
+
+      return res.status(204).json({});
     } catch (error) {
       console.error("Error:", error?.message);
 
