@@ -8,13 +8,13 @@ const { PORT } = require("./config/constants");
 const { errorHandler, notFoundHandler } = require("./middlewares/errorHandler");
 
 // Routes
-const profileRoutes = require("./routes/profileRoutes");
+const stringsRoutes = require("./routes/stringsRoutes");
 
 // Apply middlewares
 app.use(express.json());
 
 // Mount routes
-app.use("/", profileRoutes);
+app.use("/strings", stringsRoutes);
 
 // Error handling (must be last)
 app.use(notFoundHandler);

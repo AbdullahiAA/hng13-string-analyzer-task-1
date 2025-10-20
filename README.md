@@ -5,7 +5,7 @@ A Node.js/Express API following the MVC (Model-View-Controller) architectural pa
 ## Project Structure
 
 ```
-hng13-profile-task-0/
+hng13-string-analyzer-task-1/
 │
 ├── index.js                    # Application entry point
 │
