@@ -107,7 +107,7 @@ class StringsController {
       const existingEntry = (stringsDb || []).find(
         (entry) => entry.id === sha256_hash
       );
-      
+
       if (!existingEntry) {
         return res.status(404).json({
           status: "error",
@@ -116,6 +116,154 @@ class StringsController {
       }
 
       return res.status(200).json(existingEntry);
+    } catch (error) {
+      console.error("Error:", error?.message);
+
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+        error: error?.message,
+      });
+    }
+  }
+
+  static async getAllStrings(req, res) {
+    try {
+      const {
+        is_palindrome,
+        min_length,
+        max_length,
+        word_count,
+        contains_character,
+      } = req.query;
+
+      // Validate and parse query parameters
+      let isPalindromeFilter = null;
+      let minLengthFilter = null;
+      let maxLengthFilter = null;
+      let wordCountFilter = null;
+      let containsCharFilter = null;
+
+      // Validate is_palindrome
+      if (is_palindrome !== undefined) {
+        if (is_palindrome !== "true" && is_palindrome !== "false") {
+          return res.status(400).json({
+            status: "error",
+            message:
+              "Invalid query parameter: is_palindrome must be 'true' or 'false'",
+          });
+        }
+        isPalindromeFilter = is_palindrome === "true";
+      }
+
+      // Validate min_length
+      if (min_length !== undefined) {
+        minLengthFilter = parseInt(min_length, 10);
+        if (isNaN(minLengthFilter) || minLengthFilter < 0) {
+          return res.status(400).json({
+            status: "error",
+            message:
+              "Invalid query parameter: min_length must be a non-negative integer",
+          });
+        }
+      }
+
+      // Validate max_length
+      if (max_length !== undefined) {
+        maxLengthFilter = parseInt(max_length, 10);
+        if (isNaN(maxLengthFilter) || maxLengthFilter < 0) {
+          return res.status(400).json({
+            status: "error",
+            message:
+              "Invalid query parameter: max_length must be a non-negative integer",
+          });
+        }
+      }
+
+      // Validate word_count
+      if (word_count !== undefined) {
+        wordCountFilter = parseInt(word_count, 10);
+        if (isNaN(wordCountFilter) || wordCountFilter < 0) {
+          return res.status(400).json({
+            status: "error",
+            message:
+              "Invalid query parameter: word_count must be a non-negative integer",
+          });
+        }
+      }
+
+      // Validate contains_character
+      if (contains_character !== undefined) {
+        if (
+          typeof contains_character !== "string" ||
+          contains_character.length !== 1
+        ) {
+          return res.status(400).json({
+            status: "error",
+            message:
+              "Invalid query parameter: contains_character must be a single character",
+          });
+        }
+        containsCharFilter = contains_character;
+      }
+
+      // Filter strings based on provided parameters
+      const filteredStrings = stringsDb.filter((entry) => {
+        // Check is_palindrome filter
+        if (
+          isPalindromeFilter !== null &&
+          entry.properties.is_palindrome !== isPalindromeFilter
+        ) {
+          return false;
+        }
+
+        // Check min_length filter
+        if (
+          minLengthFilter !== null &&
+          entry.properties.length < minLengthFilter
+        ) {
+          return false;
+        }
+
+        // Check max_length filter
+        if (
+          maxLengthFilter !== null &&
+          entry.properties.length > maxLengthFilter
+        ) {
+          return false;
+        }
+
+        // Check word_count filter
+        if (
+          wordCountFilter !== null &&
+          entry.properties.word_count !== wordCountFilter
+        ) {
+          return false;
+        }
+
+        // Check contains_character filter
+        if (containsCharFilter !== null) {
+          if (!entry.properties.character_frequency_map[containsCharFilter]) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      const response = {
+        data: filteredStrings,
+        count: filteredStrings.length,
+        filters_applied: {
+          is_palindrome: isPalindromeFilter,
+          min_length: minLengthFilter,
+          max_length: maxLengthFilter,
+          word_count: wordCountFilter,
+          contains_character: containsCharFilter,
+        },
+      };
+
+      return res.status(200).json(response);
     } catch (error) {
       console.error("Error:", error?.message);
 
