@@ -23,7 +23,7 @@ class StringsController {
       }
 
       // Trim the value
-      value = value.trim();
+      value = value.trim().toLowerCase();
 
       const sha256_hash = createSha256Hash(value);
 
@@ -69,7 +69,7 @@ class StringsController {
 
       fs.writeFileSync(dbPath, dbContent, "utf8");
 
-      return res.status(200).json(data);
+      return res.status(201).json(data);
     } catch (error) {
       console.error("Error:", error?.message);
 
@@ -248,7 +248,7 @@ class StringsController {
       }
 
       // Trim the value
-      value = value.trim();
+      value = value.trim().toLowerCase();
       const sha256_hash = createSha256Hash(value);
 
       const existingEntry = (stringsDb || []).find(
@@ -291,6 +291,8 @@ class StringsController {
           message: "Value must be a string",
         });
       }
+
+      value = value.trim().toLowerCase();
 
       const sha256_hash = createSha256Hash(value);
 
@@ -349,8 +351,7 @@ class StringsController {
       }
 
       // Trim the query
-      const originalQuery = query.trim();
-      query = originalQuery.toLowerCase();
+      query = query.trim().toLowerCase();
 
       // Initialize parsed filters
       const parsedFilters = {};
@@ -415,7 +416,10 @@ class StringsController {
         parsedFilters.contains_character = "i";
       } else if (query.includes("fourth vowel")) {
         parsedFilters.contains_character = "o";
-      } else if (query.includes("fifth vowel") || query.includes("last vowel")) {
+      } else if (
+        query.includes("fifth vowel") ||
+        query.includes("last vowel")
+      ) {
         parsedFilters.contains_character = "u";
       }
 
